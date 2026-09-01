@@ -12,6 +12,7 @@ export default function WorkdayAlliancePage() {
 
   useEffect(() => {
     async function fetchSpecialists() {
+      if (!supabase) { setLoading(false); return; }
       const { data } = await supabase
         .from("page_content")
         .select("content")

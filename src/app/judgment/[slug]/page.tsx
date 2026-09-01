@@ -15,9 +15,13 @@ export default async function DecisionLogPage({
   
   let decision: any;
   try {
-    const { data } = await supabase.from("page_content").select("content").eq("id", `judgment_slug_${slug}`).single();
-    if (data?.content) {
-      decision = data.content;
+    if (supabase) {
+      const { data } = await supabase.from("page_content").select("content").eq("id", `judgment_slug_${slug}`).single();
+      if (data?.content) {
+        decision = data.content;
+      } else {
+        decision = getDecisionBySlug(slug);
+      }
     } else {
       decision = getDecisionBySlug(slug);
     }

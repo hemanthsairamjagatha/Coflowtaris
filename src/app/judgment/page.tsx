@@ -19,6 +19,7 @@ export default function JudgmentPage() {
 
   useEffect(() => {
     async function fetchData() {
+      if (!supabase) { setLoading(false); return; }
       const { data } = await supabase
         .from("page_content")
         .select("content")

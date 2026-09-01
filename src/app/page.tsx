@@ -19,6 +19,7 @@ export default async function Home() {
   };
 
   try {
+    if (supabase) {
     const { data: contentData } = await supabase.from('page_content').select('content').eq('id', 'home').single();
     if (contentData?.content) {
       content = contentData.content;
@@ -32,6 +33,7 @@ export default async function Home() {
     const { data: pdfData } = await supabase.from('pdf_documents').select('*').order('created_at', { ascending: false });
     if (pdfData) {
       pdfs = pdfData;
+    }
     }
   } catch (err) {
     console.error("Supabase fetch failed", err);

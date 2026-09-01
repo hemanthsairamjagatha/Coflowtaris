@@ -2,7 +2,13 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 export default async function LeveragePage() {
-  const { data: res } = await supabase.from("page_content").select("content").eq("id", "leverage").single();
+  let res: any = null;
+  if (supabase) {
+    try {
+      const { data } = await supabase.from("page_content").select("content").eq("id", "leverage").single();
+      res = data;
+    } catch (e) {}
+  }
   
   const data = res?.content || {
     hero: { eyebrow: "LEVERAGE", title: "HOW WE SCALE\nWITHOUT SCALING\nCOMPLEXITY.", subtitle: "The platforms, partnerships and specialist\nrelationships that extend what Flowtaris\ncan deliver.", stats: ["03 STRATEGIC ALLIANCES", "ACTIVE NETWORK"] },

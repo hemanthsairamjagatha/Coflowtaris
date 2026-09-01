@@ -13,6 +13,7 @@ export default function LeverageEditor() {
 
   async function fetchData() {
     setLoading(true);
+    if (!supabase) { setLoading(false); return; }
     const { data: res } = await supabase.from("page_content").select("content").eq("id", "leverage").single();
     if (res?.content) {
       setData(res.content);
@@ -37,6 +38,7 @@ export default function LeverageEditor() {
 
   async function save() {
     try {
+      if (!supabase) throw new Error("Supabase not configured");
       const { error } = await supabase.from("page_content").upsert({ id: "leverage", content: data });
       if (error) throw error;
       alert("Leverage page saved!");

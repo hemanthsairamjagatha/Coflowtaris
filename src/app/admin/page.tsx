@@ -68,6 +68,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!supabase) { setLoading(false); return; }
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session) {
@@ -94,6 +95,7 @@ export default function AdminPage() {
     setLoginLoading(true);
     setLoginError("");
 
+    if (!supabase) { setLoginError("Supabase not configured"); setLoginLoading(false); return; }
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -106,10 +108,12 @@ export default function AdminPage() {
   }
 
   async function handleLogout() {
+    if (!supabase) return;
     await supabase.auth.signOut();
   }
 
   async function fetchData() {
+    if (!supabase) { setLoading(false); return; }
     setLoading(true);
     
     // Fetch home page content
@@ -194,6 +198,7 @@ export default function AdminPage() {
   }
 
   async function saveHeroContent() {
+    if (!supabase) return;
     const newContent = {
       heroTitle,
       heroSubtitle,
@@ -255,6 +260,7 @@ export default function AdminPage() {
   }
 
   async function addPdf() {
+    if (!supabase) return;
     if (!newPdfTitle || !newPdfUrl) {
       alert("Please enter title and URL for the PDF.");
       return;
@@ -274,6 +280,7 @@ export default function AdminPage() {
   }
 
   async function deletePdf(id: string) {
+    if (!supabase) return;
     const { error } = await supabase
       .from("pdf_documents")
       .delete()
@@ -287,6 +294,7 @@ export default function AdminPage() {
   }
 
   async function saveSpecialists(updatedSpecialists: any[]) {
+    if (!supabase) return;
     const { error } = await supabase
       .from("page_content")
       .upsert({ id: "workday_specialists", content: { specialists: updatedSpecialists } });
@@ -319,6 +327,7 @@ export default function AdminPage() {
       systems: trustSystems
     };
 
+    if (!supabase) return;
     const { error } = await supabase
       .from("page_content")
       .upsert({ id: "systems_of_trust", content: newContent });
@@ -336,6 +345,7 @@ export default function AdminPage() {
       systems: updatedSystems
     };
 
+    if (!supabase) return;
     const { error } = await supabase
       .from("page_content")
       .upsert({ id: "systems_of_trust", content: newContent });
@@ -390,6 +400,7 @@ export default function AdminPage() {
       logs: decisionLogs
     };
 
+    if (!supabase) return;
     const { error } = await supabase
       .from("page_content")
       .upsert({ id: "judgment", content: newContent });
@@ -409,6 +420,7 @@ export default function AdminPage() {
       logs: updatedLogs
     };
 
+    if (!supabase) return;
     const { error } = await supabase
       .from("page_content")
       .upsert({ id: "judgment", content: newContent });
@@ -464,6 +476,7 @@ export default function AdminPage() {
     }
     setSelectedSlug(slug);
     setIsSlugLoading(true);
+    if (!supabase) { setIsSlugLoading(false); return; }
     const { data } = await supabase.from("page_content").select("content").eq("id", `judgment_slug_${slug}`).single();
     if (data?.content) {
       setSlugData(data.content);
@@ -534,6 +547,7 @@ export default function AdminPage() {
   async function saveSlugContent() {
     if (!selectedSlug || !slugData) return;
     try {
+      if (!supabase) throw new Error("Supabase not configured");
       const { error } = await supabase.from("page_content").upsert({ id: `judgment_slug_${selectedSlug}`, content: slugData });
       if (error) throw error;
       alert("Slug content saved successfully!");
