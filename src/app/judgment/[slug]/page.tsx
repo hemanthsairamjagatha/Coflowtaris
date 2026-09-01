@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getDecisionBySlug, getAllSlugs } from "../data";
+import { supabase } from "@/lib/supabase";
 
 export async function generateStaticParams() {
   return getAllSlugs().map((slug) => ({ slug }));
@@ -11,7 +12,18 @@ export default async function DecisionLogPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const decision = getDecisionBySlug(slug);
+  
+  let decision;
+  try {
+    const { data } = await supabase.from("page_content").select("content").eq("id", `judgment_slug_${slug}`).single();
+    if (data?.content) {
+      decision = data.content;
+    } else {
+      decision = getDecisionBySlug(slug);
+    }
+  } catch (e) {
+    decision = getDecisionBySlug(slug);
+  }
 
   if (!decision) {
     notFound();

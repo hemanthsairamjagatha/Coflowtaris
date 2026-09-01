@@ -1,19 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-
-// Minimal mock data for consultants to satisfy the specialist filter requirement
-const mockSpecialists = [
-  { id: "1", name: "David Chen", role: "Integration Architect", specialty: "INTEGRATION", certs: "Workday Integration Certified", link: "david-chen" },
-  { id: "2", name: "Sarah Williams", role: "Finance Systems Engineer", specialty: "FINANCE", certs: "Workday Financials", link: "sarah-williams" },
-  { id: "3", name: "Michael Chang", role: "Extend Developer", specialty: "EXTEND", certs: "Workday Extend Certified", link: "michael-chang" },
-  { id: "4", name: "Elena Rodriguez", role: "HCM Integration Lead", specialty: "HCM", certs: "Workday HCM", link: "elena-rodriguez" }
-];
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function WorkdayAlliancePage() {
   const [filter, setFilter] = useState<string>("ALL");
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [specialists, setSpecialists] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSpecialists() {
+      const { data } = await supabase
+        .from("page_content")
+        .select("content")
+        .eq("id", "workday_specialists")
+        .single();
+        
+      if (data?.content?.specialists) {
+        setSpecialists(data.content.specialists);
+      }
+      setLoading(false);
+    }
+    fetchSpecialists();
+  }, []);
 
   const handleCopy = (text: string, id: number) => {
     navigator.clipboard.writeText(text);
@@ -21,7 +32,7 @@ export default function WorkdayAlliancePage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const filteredSpecialists = filter === "ALL" ? mockSpecialists : mockSpecialists.filter(s => s.specialty === filter);
+  const filteredSpecialists = filter === "ALL" ? specialists : specialists.filter(s => s.specialty === filter);
 
   return (
     <>
@@ -326,16 +337,22 @@ export default function WorkdayAlliancePage() {
         </div>
 
         <div className="trust-grid">
-          {filteredSpecialists.map(specialist => (
-            <div key={specialist.id} className="trust-card" style={{ padding: '32px', backgroundColor: 'var(--color-surface)' }}>
-              <h3 className="card-heading" style={{ marginBottom: '8px', fontSize: '1.25rem' }}>{specialist.name}</h3>
-              <p className="trust-body" style={{ marginBottom: '16px' }}>{specialist.role}</p>
-              <span className="section-label" style={{ margin: '0 0 24px 0', display: 'block', fontSize: '0.75rem' }}>{specialist.certs}</span>
-              <div style={{ display: 'flex', gap: '24px' }}>
-                <Link href={`/leverage/consultants/${specialist.link}`} className="judgment-cta">PROFILE &rarr;</Link>
+          {loading ? (
+            <div style={{ padding: '32px', color: 'var(--color-text-secondary)' }}>Loading specialists...</div>
+          ) : filteredSpecialists.length === 0 ? (
+            <div style={{ padding: '32px', color: 'var(--color-text-secondary)' }}>No specialists found.</div>
+          ) : (
+            filteredSpecialists.map(specialist => (
+              <div key={specialist.id} className="trust-card" style={{ padding: '32px', backgroundColor: 'var(--color-surface)' }}>
+                <h3 className="card-heading" style={{ marginBottom: '8px', fontSize: '1.25rem' }}>{specialist.name}</h3>
+                <p className="trust-body" style={{ marginBottom: '16px' }}>{specialist.role}</p>
+                <span className="section-label" style={{ margin: '0 0 24px 0', display: 'block', fontSize: '0.75rem' }}>{specialist.certs}</span>
+                <div style={{ display: 'flex', gap: '24px' }}>
+                  <Link href={`/leverage/consultants/${specialist.link}`} className="judgment-cta">PROFILE &rarr;</Link>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </section>
 

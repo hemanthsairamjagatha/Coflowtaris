@@ -1,52 +1,68 @@
 "use client";
 
-import { useState } from "react";
-
-const allDecisionLogs = [
-  {
-    id: "01",
-    date: "15 MAR 2026",
-    author: "CEO",
-    tags: ["STRATEGY", "PRICING"],
-    title: "WHY WE MOVED FROM\nT&M TO OUTCOME-BASED PRICING",
-    excerpt: "Clients wanted certainty. We wanted alignment.\nHere's the model that works for both — and the\nthree clients who said no.",
-    principle: "Price for the outcome, not the hour.",
-    href: "/judgment/pricing"
-  },
-  {
-    id: "02",
-    date: "03 FEB 2026",
-    author: "CTO",
-    tags: ["TECH", "CRISIS"],
-    title: "THE NETSUITE 2024.2 API CRISIS",
-    excerpt: "47 clients. Six weeks. One platform change\nthat couldn't wait.",
-    principle: "Platform risk is our risk. We absorb it.",
-    href: "/judgment/netsuite"
-  },
-  {
-    id: "03",
-    date: "10 JAN 2026",
-    author: "COO",
-    tags: ["HIRING", "CULTURE"],
-    title: "WHY WE HIRED A PRINCIPAL\nBEFORE WE NEEDED ONE",
-    excerpt: "Capacity planning isn't about today's utilization.\nIt's about tomorrow's risk.",
-    principle: "Hire for the crisis, not the comfort.",
-    href: "/judgment/hiring"
-  }
-];
-
-const availableTags = ["ALL", "STRATEGY", "TECH", "CRISIS", "HIRING", "PRICING", "CULTURE"];
-const availableAuthors = ["AUTHOR / ALL", "CEO", "CTO", "COO"];
-const availableYears = ["YEAR / 2026"];
+import { useState, useEffect, useMemo } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function JudgmentPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTag, setActiveTag] = useState("ALL");
   const [activeAuthor, setActiveAuthor] = useState("AUTHOR / ALL");
   const [activeYear, setActiveYear] = useState("YEAR / 2026");
+  
+  const [decisionLogs, setDecisionLogs] = useState<any[]>([]);
+  const [judgmentContent, setJudgmentContent] = useState<any>({
+    title: "HOW WE THINK.",
+    subtitle: "Written by the people making the decisions.",
+    description: "Decisions made under pressure.\\nWhat we chose. What we rejected.\\nWhat happened next."
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      const { data } = await supabase
+        .from("page_content")
+        .select("content")
+        .eq("id", "judgment")
+        .single();
+        
+      if (data?.content) {
+        setJudgmentContent({
+          title: data.content.title || "HOW WE THINK.",
+          subtitle: data.content.subtitle || "Written by the people making the decisions.",
+          description: data.content.description || "Decisions made under pressure.\\nWhat we chose. What we rejected.\\nWhat happened next."
+        });
+        if (data.content.logs) {
+          setDecisionLogs(data.content.logs);
+        }
+      } else {
+        // Fallback default logs if not found
+        setDecisionLogs([
+          { id: "01", date: "15 MAR 2026", author: "CEO", tags: ["STRATEGY", "PRICING"], title: "WHY WE MOVED FROM\nT&M TO OUTCOME-BASED PRICING", excerpt: "Clients wanted certainty. We wanted alignment.\nHere's the model that works for both — and the\nthree clients who said no.", principle: "Price for the outcome, not the hour.", href: "/judgment/pricing" },
+          { id: "02", date: "03 FEB 2026", author: "CTO", tags: ["TECH", "CRISIS"], title: "THE NETSUITE 2024.2 API CRISIS", excerpt: "47 clients. Six weeks. One platform change\nthat couldn't wait.", principle: "Platform risk is our risk. We absorb it.", href: "/judgment/netsuite" },
+          { id: "03", date: "10 JAN 2026", author: "COO", tags: ["HIRING", "CULTURE"], title: "WHY WE HIRED A PRINCIPAL\nBEFORE WE NEEDED ONE", excerpt: "Capacity planning isn't about today's utilization.\nIt's about tomorrow's risk.", principle: "Hire for the crisis, not the comfort.", href: "/judgment/hiring" }
+        ]);
+      }
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
+
+  const formatText = (text: string) => {
+    if (!text) return null;
+    return text.split(/\\n|\n/).map((line, i, arr) => (
+      <span key={i}>
+        {line}
+        {i < arr.length - 1 && <br />}
+      </span>
+    ));
+  };
+
+  const availableTags = useMemo(() => ["ALL", ...Array.from(new Set(decisionLogs.flatMap(log => log.tags || [])))], [decisionLogs]);
+  const availableAuthors = useMemo(() => ["AUTHOR / ALL", ...Array.from(new Set(decisionLogs.map(log => log.author).filter(Boolean)))], [decisionLogs]);
+  const availableYears = ["YEAR / ALL", "YEAR / 2026"];
 
   // Filter logic
-  const filteredLogs = allDecisionLogs.filter((log) => {
+  const filteredLogs = decisionLogs.filter((log) => {
     // 1. Search filter
     const matchesSearch = 
       searchQuery === "" || 
@@ -72,17 +88,15 @@ export default function JudgmentPage() {
       {/* 1. Page Introduction */}
       <section className="section hero">
         <span className="eyebrow">JUDGMENT</span>
-        <h1 className="hero-headline" style={{ fontSize: "5rem", marginBottom: "24px" }}>HOW WE THINK.</h1>
+        <h1 className="hero-headline" style={{ fontSize: "5rem", marginBottom: "24px" }}>{formatText(judgmentContent.title)}</h1>
         <div className="hero-supporting" style={{ color: "var(--color-text-primary)", fontSize: "1.5rem", marginBottom: "16px" }}>
-          Written by the people making the decisions.
+          {formatText(judgmentContent.subtitle)}
         </div>
         <div className="hero-supporting" style={{ fontSize: "1.125rem", maxWidth: "500px", marginBottom: "48px" }}>
-          Decisions made under pressure.<br />
-          What we chose. What we rejected.<br />
-          What happened next.
+          {formatText(judgmentContent.description)}
         </div>
         <div className="judgment-meta" style={{ width: "100%", justifyContent: "space-between", borderTop: "1px solid var(--color-structural)", paddingTop: "24px", marginBottom: 0 }}>
-          <span>03 LOGS</span>
+          <span>{decisionLogs.length < 10 ? `0${decisionLogs.length}` : decisionLogs.length} LOGS</span>
           <span>2026</span>
         </div>
       </section>
@@ -154,19 +168,19 @@ export default function JudgmentPage() {
             <div key={log.id} className={`decision-record ${index === 0 ? "featured" : ""}`}>
               <div className="judgment-meta">
                 <span>{log.date}</span>
-                <span className="judgment-tags">{log.author} &middot; {log.tags.join(" \u00B7 ")}</span>
+                <span className="judgment-tags">{log.author} &middot; {(log.tags || []).join(" \u00B7 ")}</span>
               </div>
-              <h2 className="judgment-title section-heading" style={{ maxWidth: index === 0 ? "none" : "800px" }}>{log.title}</h2>
-              <div className="judgment-desc" style={{ whiteSpace: "pre-line", maxWidth: index === 0 ? "700px" : "600px", fontSize: index === 0 ? "1.5rem" : "1.125rem" }}>
-                {log.excerpt}
+              <h2 className="judgment-title section-heading" style={{ maxWidth: index === 0 ? "none" : "800px" }}>{formatText(log.title)}</h2>
+              <div className="judgment-desc" style={{ whiteSpace: "normal", maxWidth: index === 0 ? "700px" : "600px", fontSize: index === 0 ? "1.5rem" : "1.125rem" }}>
+                {formatText(log.excerpt)}
               </div>
               <div className="judgment-principle">
-                {log.principle}
+                {formatText(log.principle)}
               </div>
               <a href={log.href} className="judgment-cta" style={{ alignSelf: "flex-start", marginTop: "8px" }}>READ DECISION &rarr;</a>
             </div>
           ))}
-          {filteredLogs.length === 0 && (
+          {filteredLogs.length === 0 && !loading && (
             <div className="decision-record" style={{ textAlign: "center", padding: "64px" }}>
               <div className="judgment-desc" style={{ margin: "0 auto 24px" }}>No decisions match your current filters.</div>
               <button 
@@ -181,6 +195,11 @@ export default function JudgmentPage() {
               >
                 CLEAR FILTERS
               </button>
+            </div>
+          )}
+          {loading && (
+            <div className="decision-record" style={{ textAlign: "center", padding: "64px" }}>
+              <div className="judgment-desc" style={{ margin: "0 auto 24px" }}>Loading logs...</div>
             </div>
           )}
         </div>

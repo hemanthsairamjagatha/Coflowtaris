@@ -1,53 +1,105 @@
-export default function Home() {
+import { supabase } from '@/lib/supabase';
+
+export const revalidate = 0;
+
+export default async function Home() {
+  let content: any = {
+    heroTitle: "WE DON'T JUST\nDELIVER SYSTEMS.\nWE MAKE THE\nDECISIONS BEHIND THEM\nVISIBLE.",
+    heroSubtitle: "Engineering complex systems for companies where reliability, judgment, and execution matter.",
+    heroImage: "/hero_image.png"
+  };
+  let pdfs: any[] = [];
+  let trustContent: any = {
+    title: "THREE SYSTEMS OF TRUST",
+    systems: [
+      { id: "1", heading: "JUDGMENT", description: "How we think.", items: ["Decision logs", "Principles"], ctaText: "EXPLORE \u2192", ctaLink: "#judgment" },
+      { id: "2", heading: "EVIDENCE", description: "How we operate.", items: ["Governance", "Security"], ctaText: "EXPLORE \u2192", ctaLink: "#evidence" },
+      { id: "3", heading: "LEVERAGE", description: "How we scale.", items: ["Partnerships", "Alliances"], ctaText: "EXPLORE \u2192", ctaLink: "#leverage" }
+    ]
+  };
+
+  try {
+    const { data: contentData } = await supabase.from('page_content').select('content').eq('id', 'home').single();
+    if (contentData?.content) {
+      content = contentData.content;
+    }
+    
+    const { data: trustData } = await supabase.from('page_content').select('content').eq('id', 'systems_of_trust').single();
+    if (trustData?.content) {
+      trustContent = trustData.content;
+    }
+    
+    const { data: pdfData } = await supabase.from('pdf_documents').select('*').order('created_at', { ascending: false });
+    if (pdfData) {
+      pdfs = pdfData;
+    }
+  } catch (err) {
+    console.error("Supabase fetch failed", err);
+  }
+
+  const formatText = (text: string) => {
+    if (!text) return null;
+    return text.split(/\\n|\n/).map((line, i, arr) => (
+      <span key={i}>
+        {line}
+        {i < arr.length - 1 && <br />}
+      </span>
+    ));
+  };
+
   return (
     <>
       {/* 5. HERO */}
-      <section className="section hero">
-        <span className="eyebrow">FLOWTARIS</span>
-        <h1 className="hero-headline section-heading">
-          WE DON&apos;T JUST<br />
-          DELIVER SYSTEMS.<br />
-          WE MAKE THE<br />
-          DECISIONS BEHIND THEM<br />
-          VISIBLE.
-        </h1>
-        <p className="hero-supporting card-description">
-          Engineering complex systems for companies where reliability, judgment, and execution matter.
-        </p>
-        <a href="#judgment" className="cta-button primary">EXPLORE OUR JUDGMENT &rarr;</a>
+      <section className="section hero home-hero-layout">
+        <div className="hero-content">
+          <span className="eyebrow">FLOWTARIS</span>
+          <h1 className="hero-headline section-heading">
+            {formatText(content.heroTitle)}
+          </h1>
+          <p className="hero-supporting card-description">
+            {formatText(content.heroSubtitle)}
+          </p>
+          <a href="#judgment" className="cta-button primary">EXPLORE OUR JUDGMENT &rarr;</a>
+        </div>
+        <div className="hero-image-wrapper">
+          <img src={content.heroImage || "/hero_image.png"} alt="Flowtaris Modern Architecture" className="hero-image" />
+        </div>
       </section>
+
+      {/* PDF SECTION */}
+      {pdfs.length > 0 && (
+        <section className="section" id="resources" style={{ paddingBottom: '6rem' }}>
+          <h2 className="section-title section-heading">AVAILABLE RESOURCES</h2>
+          <div className="trust-grid">
+            {pdfs.map((pdf) => (
+              <div key={pdf.id} className="trust-card">
+                <h3 className="card-heading">{pdf.title}</h3>
+                <p className="trust-desc card-description">PDF Document</p>
+                <a href={pdf.url} target="_blank" rel="noreferrer" className="trust-cta">VIEW DOCUMENT &rarr;</a>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 6. THREE SYSTEMS OF TRUST */}
       <section className="section trust-systems" id="trust">
-        <h2 className="section-title section-heading">THREE SYSTEMS OF TRUST</h2>
+        <h2 className="section-title section-heading">{trustContent.title || "THREE SYSTEMS OF TRUST"}</h2>
         <div className="trust-grid">
-          <div className="trust-card">
-            <h3 className="card-heading">JUDGMENT</h3>
-            <p className="trust-desc card-description">How we think.</p>
-            <ul className="trust-list">
-              <li>Decision logs</li>
-              <li>Principles</li>
-            </ul>
-            <a href="#judgment" className="trust-cta">EXPLORE &rarr;</a>
-          </div>
-          <div className="trust-card">
-            <h3 className="card-heading">EVIDENCE</h3>
-            <p className="trust-desc card-description">How we operate.</p>
-            <ul className="trust-list">
-              <li>Governance</li>
-              <li>Security</li>
-            </ul>
-            <a href="#evidence" className="trust-cta">EXPLORE &rarr;</a>
-          </div>
-          <div className="trust-card">
-            <h3 className="card-heading">LEVERAGE</h3>
-            <p className="trust-desc card-description">How we scale.</p>
-            <ul className="trust-list">
-              <li>Partnerships</li>
-              <li>Alliances</li>
-            </ul>
-            <a href="#leverage" className="trust-cta">EXPLORE &rarr;</a>
-          </div>
+          {(trustContent.systems || []).map((system: any) => (
+            <div key={system.id} className="trust-card">
+              <h3 className="card-heading">{system.heading}</h3>
+              <p className="trust-desc card-description">{system.description}</p>
+              {system.items && system.items.length > 0 && (
+                <ul className="trust-list">
+                  {system.items.map((item: string, i: number) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              )}
+              <a href={system.ctaLink} className="trust-cta">{system.ctaText}</a>
+            </div>
+          ))}
         </div>
       </section>
 
