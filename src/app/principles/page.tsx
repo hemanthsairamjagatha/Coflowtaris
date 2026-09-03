@@ -15,7 +15,11 @@ export default function PrinciplesPage() {
   useEffect(() => {
     async function fetchData() {
       // Fetch principles page content
-      const { data: pageRes } = await supabase.from("page_content").select("content").eq("id", "principles").single();
+      let pageRes: any = null;
+      if (supabase) {
+        const { data } = await supabase.from("page_content").select("content").eq("id", "principles").single();
+        pageRes = data;
+      }
       if (pageRes?.content) {
         setPageData(pageRes.content);
       } else {
@@ -34,7 +38,11 @@ export default function PrinciplesPage() {
       }
 
       // Fetch logs
-      const { data: logsRes } = await supabase.from("page_content").select("content").eq("id", "judgment").single();
+      let logsRes: any = null;
+      if (supabase) {
+        const { data } = await supabase.from("page_content").select("content").eq("id", "judgment").single();
+        logsRes = data;
+      }
       if (logsRes?.content?.logs) {
         setDecisionLogs(logsRes.content.logs);
       }
