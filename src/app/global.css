@@ -202,6 +202,17 @@ main {
   color: var(--color-accent);
 }
 
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  padding: 4px;
+  line-height: 1;
+}
+
 @media (max-width: 1024px) {
   .header-inner {
     padding: 20px 48px;
@@ -210,14 +221,39 @@ main {
 
 @media (max-width: 768px) {
   .header-inner {
-    padding: 16px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+    padding: 16px 24px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0;
+  }
+  .mobile-menu-btn {
+    display: block;
   }
   .header-nav {
-    flex-wrap: wrap;
-    gap: 16px;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: rgba(242, 238, 230, 0.98);
+    flex-direction: column;
+    padding: 24px;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    border-bottom: 1px solid var(--color-structural);
+    align-items: flex-start;
+    gap: 0;
+  }
+  .header-nav.open {
+    display: flex;
+  }
+  .header-nav a {
+    width: 100%;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--color-structural);
+  }
+  .header-nav a:last-child {
+    border-bottom: none;
   }
 }
 
