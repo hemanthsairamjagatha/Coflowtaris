@@ -15,7 +15,7 @@ export default async function LeveragePage() {
     leverageModel: { title: "HOW WE CREATE LEVERAGE", items: [{ title: "PLATFORMS", desc: "Technology platforms that allow\nus to solve complex problems faster." }, { title: "PARTNERS", desc: "Strategic relationships that expand\ncapability and reach." }, { title: "PEOPLE", desc: "Specialists who bring depth where\ngeneral capability isn't enough." }] },
     strategicAlliances: { title: "STRATEGIC ALLIANCES", alliances: [{ num: "01", name: "NETSUITE", desc: "ERP implementation, integration and platform engineering.", status: "[ IN DEVELOPMENT ]", href: "/leverage/netsuite" }, { num: "02", name: "COUPA", desc: "Procurement platform engineering, integration and optimization.", status: "[ IN DEVELOPMENT ]", href: "/leverage/coupa" }, { num: "03", name: "WORKDAY", desc: "Enterprise platform integration, engineering and delivery.", status: "[ IN DEVELOPMENT ]", href: "/leverage/workday" }] },
     partnershipsChange: { title: "PARTNERSHIPS SHOULD CHANGE\nTHE OUTCOME.", subtitle: "Not the logo wall.", withoutLeverage: ["Client problem", "Flowtaris capability", "Limited delivery boundary"], withLeverage: ["Client problem", "Flowtaris", "Strategic platform / partner", "Specialist capability", "Larger solution surface"] },
-    capabilityMap: { title: "CAPABILITY MAP", capabilities: [{ name: "Architecture", f: "●", p: "●", s: "○" }, { name: "Integration", f: "●", p: "●", s: "○" }, { name: "Platform Engineering", f: "●", p: "●", s: "○" }, { name: "Data Engineering", f: "●", p: "○", s: "●" }, { name: "ERP", f: "○", p: "●", s: "●" }, { name: "Procurement", f: "○", p: "●", s: "●" }, { name: "AI / Automation", f: "●", p: "○", s: "●" }] },
+    capabilityMap: { title: "CAPABILITY MAP", capabilities: [{ name: "Architecture", f: "✓", p: "✓", s: "✕" }, { name: "Integration", f: "✓", p: "✓", s: "✕" }, { name: "Platform Engineering", f: "✓", p: "✓", s: "✕" }, { name: "Data Engineering", f: "✓", p: "✕", s: "✓" }, { name: "ERP", f: "✕", p: "✓", s: "✓" }, { name: "Procurement", f: "✕", p: "✓", s: "✓" }, { name: "AI / Automation", f: "✓", p: "✕", s: "✓" }] },
     partnerRegistration: { label: "PARTNER DEAL REGISTRATION", title: "HAVE AN OPPORTUNITY?", desc: "Register it once.\nWe'll route it to the appropriate Flowtaris\nteam and partner relationship.", cta: "REGISTER AN OPPORTUNITY →" },
     partnerPipeline: { title: "PARTNER PIPELINE", desc: "PIPELINE DATA\nCOMING ONLINE" },
     specialistNetwork: { label: "SPECIALIST NETWORK", title: "WHEN DEPTH MATTERS,\nBRING IN THE RIGHT PERSON.", desc: "A curated network of specialists\nacross platforms, engineering,\ndata and enterprise operations.", cta: "EXPLORE SPECIALISTS →", categories: [{ label: "ERP", items: ["NetSuite", "SAP", "Workday"] }, { label: "DATA", items: ["Data Engineering", "Analytics", "AI"] }, { label: "OPERATIONS", items: ["Transformation", "Architecture", "Program Leadership"] }] },
@@ -182,15 +182,15 @@ export default async function LeveragePage() {
 
       {/* The Flowtaris Network */}
       <section className="section" style={{ borderTop: '1px solid var(--color-structural)' }}>
-        <h2 className="section-label" style={{ marginBottom: '48px' }}>{data.flowtarisNetwork?.title}</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <h2 className="section-label" style={{ marginBottom: '48px', textAlign: 'center' }}>{data.flowtarisNetwork?.title}</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', alignItems: 'center', textAlign: 'center' }}>
           {(data.flowtarisNetwork?.domains || []).map((domain: any, i: number, arr: any[]) => (
-            <div key={i}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <span className="section-heading" style={{ fontSize: '2rem', margin: 0 }}>{domain.ext}</span>
-                <span className="trust-body">{domain.desc}</span>
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                <span className="section-heading" style={{ fontSize: '3rem', margin: 0 }}>{domain.ext}</span>
+                <span className="trust-body" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>{domain.desc}</span>
               </div>
-              {i < arr.length - 1 && <span style={{ color: 'var(--color-text-secondary)', fontSize: '1.25rem', marginTop: '32px', display: 'block' }}>&darr;</span>}
+              {i < arr.length - 1 && <span style={{ color: 'var(--color-text-secondary)', fontSize: '1.5rem', marginTop: '32px', display: 'block', textAlign: 'center' }}>&darr;</span>}
             </div>
           ))}
         </div>

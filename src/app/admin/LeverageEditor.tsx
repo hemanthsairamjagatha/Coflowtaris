@@ -24,7 +24,7 @@ export default function LeverageEditor() {
         leverageModel: { title: "HOW WE CREATE LEVERAGE", items: [{ title: "PLATFORMS", desc: "Technology platforms that allow\\nus to solve complex problems faster." }, { title: "PARTNERS", desc: "Strategic relationships that expand\\ncapability and reach." }, { title: "PEOPLE", desc: "Specialists who bring depth where\\ngeneral capability isn't enough." }] },
         strategicAlliances: { title: "STRATEGIC ALLIANCES", alliances: [{ num: "01", name: "NETSUITE", desc: "ERP implementation, integration and platform engineering.", status: "[ IN DEVELOPMENT ]", href: "/leverage/netsuite" }, { num: "02", name: "COUPA", desc: "Procurement platform engineering, integration and optimization.", status: "[ IN DEVELOPMENT ]", href: "/leverage/coupa" }, { num: "03", name: "WORKDAY", desc: "Enterprise platform integration, engineering and delivery.", status: "[ IN DEVELOPMENT ]", href: "/leverage/workday" }] },
         partnershipsChange: { title: "PARTNERSHIPS SHOULD CHANGE\\nTHE OUTCOME.", subtitle: "Not the logo wall.", withoutLeverage: ["Client problem", "Flowtaris capability", "Limited delivery boundary"], withLeverage: ["Client problem", "Flowtaris", "Strategic platform / partner", "Specialist capability", "Larger solution surface"] },
-        capabilityMap: { title: "CAPABILITY MAP", capabilities: [{ name: "Architecture", f: "●", p: "●", s: "○" }, { name: "Integration", f: "●", p: "●", s: "○" }, { name: "Platform Engineering", f: "●", p: "●", s: "○" }, { name: "Data Engineering", f: "●", p: "○", s: "●" }, { name: "ERP", f: "○", p: "●", s: "●" }, { name: "Procurement", f: "○", p: "●", s: "●" }, { name: "AI / Automation", f: "●", p: "○", s: "●" }] },
+        capabilityMap: { title: "CAPABILITY MAP", capabilities: [{ name: "Architecture", f: "✓", p: "✓", s: "✕" }, { name: "Integration", f: "✓", p: "✓", s: "✕" }, { name: "Platform Engineering", f: "✓", p: "✓", s: "✕" }, { name: "Data Engineering", f: "✓", p: "✕", s: "✓" }, { name: "ERP", f: "✕", p: "✓", s: "✓" }, { name: "Procurement", f: "✕", p: "✓", s: "✓" }, { name: "AI / Automation", f: "✓", p: "✕", s: "✓" }] },
         partnerRegistration: { label: "PARTNER DEAL REGISTRATION", title: "HAVE AN OPPORTUNITY?", desc: "Register it once.\\nWe'll route it to the appropriate Flowtaris\\nteam and partner relationship.", cta: "REGISTER AN OPPORTUNITY →" },
         partnerPipeline: { title: "PARTNER PIPELINE", desc: "PIPELINE DATA\\nCOMING ONLINE" },
         specialistNetwork: { label: "SPECIALIST NETWORK", title: "WHEN DEPTH MATTERS,\\nBRING IN THE RIGHT PERSON.", desc: "A curated network of specialists\\nacross platforms, engineering,\\ndata and enterprise operations.", cta: "EXPLORE SPECIALISTS →", categories: [{ label: "ERP", items: ["NetSuite", "SAP", "Workday"] }, { label: "DATA", items: ["Data Engineering", "Analytics", "AI"] }, { label: "OPERATIONS", items: ["Transformation", "Architecture", "Program Leadership"] }] },
@@ -125,13 +125,30 @@ export default function LeverageEditor() {
         <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Capability Map</h2>
         <input value={data.capabilityMap.title} onChange={e => update("capabilityMap", "title", e.target.value)} placeholder="Title" style={{ padding: 10, border: "1px solid #D1D5DB", borderRadius: 6, width: "100%", marginBottom: 16 }} />
         {(data.capabilityMap.capabilities || []).map((c: any, i: number) => (
-          <div key={i} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 8, marginBottom: 8 }}>
+          <div key={i} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr auto", gap: 8, marginBottom: 8, alignItems: "center" }}>
             <input value={c.name} onChange={e => { const arr = [...data.capabilityMap.capabilities]; arr[i].name = e.target.value; update("capabilityMap", "capabilities", arr); }} placeholder="Capability" style={{ padding: 8, border: "1px solid #D1D5DB", borderRadius: 6 }} />
-            <input value={c.f} onChange={e => { const arr = [...data.capabilityMap.capabilities]; arr[i].f = e.target.value; update("capabilityMap", "capabilities", arr); }} placeholder="Flowtaris (●/○)" style={{ padding: 8, border: "1px solid #D1D5DB", borderRadius: 6 }} />
-            <input value={c.p} onChange={e => { const arr = [...data.capabilityMap.capabilities]; arr[i].p = e.target.value; update("capabilityMap", "capabilities", arr); }} placeholder="Partner (●/○)" style={{ padding: 8, border: "1px solid #D1D5DB", borderRadius: 6 }} />
-            <input value={c.s} onChange={e => { const arr = [...data.capabilityMap.capabilities]; arr[i].s = e.target.value; update("capabilityMap", "capabilities", arr); }} placeholder="Specialist (●/○)" style={{ padding: 8, border: "1px solid #D1D5DB", borderRadius: 6 }} />
+            <select value={c.f} onChange={e => { const arr = [...data.capabilityMap.capabilities]; arr[i].f = e.target.value; update("capabilityMap", "capabilities", arr); }} style={{ padding: 8, border: "1px solid #D1D5DB", borderRadius: 6 }}>
+              <option value="✓">✓ (Tick)</option>
+              <option value="✕">✕ (Cross)</option>
+              <option value="●">● (Filled)</option>
+              <option value="○">○ (Empty)</option>
+            </select>
+            <select value={c.p} onChange={e => { const arr = [...data.capabilityMap.capabilities]; arr[i].p = e.target.value; update("capabilityMap", "capabilities", arr); }} style={{ padding: 8, border: "1px solid #D1D5DB", borderRadius: 6 }}>
+              <option value="✓">✓ (Tick)</option>
+              <option value="✕">✕ (Cross)</option>
+              <option value="●">● (Filled)</option>
+              <option value="○">○ (Empty)</option>
+            </select>
+            <select value={c.s} onChange={e => { const arr = [...data.capabilityMap.capabilities]; arr[i].s = e.target.value; update("capabilityMap", "capabilities", arr); }} style={{ padding: 8, border: "1px solid #D1D5DB", borderRadius: 6 }}>
+              <option value="✓">✓ (Tick)</option>
+              <option value="✕">✕ (Cross)</option>
+              <option value="●">● (Filled)</option>
+              <option value="○">○ (Empty)</option>
+            </select>
+            <button onClick={() => { const arr = [...data.capabilityMap.capabilities]; arr.splice(i, 1); update("capabilityMap", "capabilities", arr); }} style={{ background: "#EF4444", color: "#fff", border: "none", borderRadius: 4, padding: "8px 12px", cursor: "pointer" }}>Delete</button>
           </div>
         ))}
+        <button onClick={() => { const arr = [...(data.capabilityMap.capabilities || []), { name: "", f: "✕", p: "✕", s: "✕" }]; update("capabilityMap", "capabilities", arr); }} style={{ marginTop: 8, background: "#111827", color: "#fff", border: "none", borderRadius: 6, padding: "8px 16px", cursor: "pointer" }}>Add Capability</button>
       </div>
 
       {/* Others (Partner Reg, Pipeline, Specialist, Flowtaris Network, CTA) */}
