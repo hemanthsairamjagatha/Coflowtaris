@@ -81,7 +81,7 @@ export default async function DecisionLogPage({
               {/* Context */}
               <section className="dl-section">
                 <h2 className="section-label">CONTEXT</h2>
-                {decision.context.map((paragraph: string, i: number) => (
+                {(decision.context || []).map((paragraph: string, i: number) => (
                   <p key={i} className="trust-body card-description" style={{ lineHeight: 1.6, marginBottom: '16px', maxWidth: '640px' }}>{paragraph}</p>
                 ))}
               </section>
@@ -97,7 +97,7 @@ export default async function DecisionLogPage({
               <section className="dl-section">
                 <h2 className="section-label">ALTERNATIVES REJECTED</h2>
                 <div className="dl-alternatives">
-                  {decision.alternativesRejected.map((alt: any) => (
+                  {(decision.alternativesRejected || []).map((alt: any) => (
                     <div key={alt.number} className="dl-alternative">
                       <span className="dl-alt-number">{alt.number}</span>
                       <h3 className="dl-alt-title">{alt.title}</h3>
@@ -112,14 +112,14 @@ export default async function DecisionLogPage({
                 <h2 className="section-label">OUTCOME</h2>
                 <p className="trust-body card-description" style={{ marginBottom: "32px", lineHeight: 1.6, maxWidth: '640px' }}>{decision.outcome.timeframe}</p>
                 <div className="dl-metrics">
-                  {decision.outcome.metrics.map((metric: any, i: number) => (
+                  {(decision.outcome?.metrics || []).map((metric: any, i: number) => (
                     <div key={i} className="dl-metric">
                       <span className="dl-metric-value">{metric.value}</span>
                       <span className="dl-metric-label">{metric.label}</span>
                     </div>
                   ))}
                 </div>
-                {decision.outcome.caveats.map((caveat: string, i: number) => (
+                {(decision.outcome?.caveats || []).map((caveat: string, i: number) => (
                   <p key={i} className="trust-body card-description" style={{ lineHeight: 1.6, marginBottom: '16px', maxWidth: '640px' }}>{caveat}</p>
                 ))}
               </section>
@@ -153,7 +153,7 @@ export default async function DecisionLogPage({
       <section className="section dl-section">
         <h2 className="section-label">RELATED DECISIONS</h2>
         <div className="trust-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-          {decision.relatedDecisions.map((related: any, i: number) => (
+          {(decision.relatedDecisions || []).map((related: any, i: number) => (
             <div key={i} className="trust-card" style={{ padding: '32px', gap: '12px' }}>
               <h3 className="card-heading" style={{ textTransform: 'uppercase', marginBottom: 0 }}>{related.title}</h3>
               <span className="judgment-tags" style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.05em' }}>{related.tags}</span>

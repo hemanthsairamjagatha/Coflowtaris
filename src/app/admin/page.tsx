@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import LeverageEditor from "./LeverageEditor";
+import PrinciplesEditor from "./PrinciplesEditor";
 import { 
   LayoutDashboard, 
   Type, 
@@ -1382,7 +1383,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          {["principles", "statement"].includes(activeTab) && (
+          {["statement"].includes(activeTab) && (
             <div style={{ maxWidth: 800 }}>
               <h1 style={{ fontSize: 24, fontWeight: "bold", color: "#111827", marginBottom: 24, textTransform: "capitalize" }}>
                 {activeTab.replace("-", " ")}
@@ -1399,6 +1400,7 @@ export default function AdminPage() {
             </div>
           )}
           {activeTab === "leverage" && <LeverageEditor />}
+          {activeTab === "principles" && <PrinciplesEditor />}
         </main>
       </div>
     </div>

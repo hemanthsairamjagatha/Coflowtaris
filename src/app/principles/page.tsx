@@ -1,30 +1,64 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
-import { decisionLogs } from "../judgment/data";
+import { useState, useMemo, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function PrinciplesPage() {
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [selectedYear, setSelectedYear] = useState("ALL");
 
-  // Extract and compute dynamic data
+  const [decisionLogs, setDecisionLogs] = useState<any[]>([]);
+  const [pageData, setPageData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      // Fetch principles page content
+      const { data: pageRes } = await supabase.from("page_content").select("content").eq("id", "principles").single();
+      if (pageRes?.content) {
+        setPageData(pageRes.content);
+      } else {
+        setPageData({
+          hero: { eyebrow: "PRINCIPLES", title: "WHAT WE BELIEVE\nAFTER MAKING THE\nDECISION.", subtitle: "Principles extracted from the decisions we've actually made." },
+          intro: { title: "THESE AREN'T BRAND VALUES.", subtitle: "They're conclusions.", body: "Each principle came from a decision:\nsomething we chose,\nsomething we rejected,\nand something we learned." },
+          relationship: { steps: [{ label: "DECISION", color: "default" }, { label: "OUTCOME", color: "default" }, { label: "PRINCIPLE", color: "accent" }, { label: "FUTURE DECISIONS", color: "default" }], footer1: "A principle isn't written first.", footer2: "It is earned through a decision." },
+          evolved: { title: "HOW THE PRINCIPLES EVOLVED" },
+          explore: { title: "EXPLORE PRINCIPLES" },
+          featured: { label: "FEATURED PRINCIPLE" },
+          indexSection: { title: "PRINCIPLES" },
+          judgmentConnection: { title: "EVERY PRINCIPLE HAS A HISTORY.", desc: "READ THE DECISIONS\nTHAT CREATED THEM.", cta: "EXPLORE JUDGMENT →" },
+          evidenceConnection: { title: "PRINCIPLES → DECISIONS → EVIDENCE", steps: [{ label: "What we believe", color: "default" }, { label: "What we decided", color: "default" }, { label: "How we operate", color: "accent" }], cta: "EXPLORE EVIDENCE →" },
+          closing: { title: "PRINCIPLES AREN'T PROMISES.", desc: "THEY'RE THE PATTERNS WE KEEP\nAFTER THE DECISION IS MADE." }
+        });
+      }
+
+      // Fetch logs
+      const { data: logsRes } = await supabase.from("page_content").select("content").eq("id", "judgment").single();
+      if (logsRes?.content?.logs) {
+        setDecisionLogs(logsRes.content.logs);
+      }
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
+
   const principles = useMemo(() => {
     return decisionLogs.map(log => {
-      const yearMatch = log.date.match(/\d{4}/);
+      const yearMatch = log.date?.match(/\d{4}/);
       const year = yearMatch ? yearMatch[0] : "Unknown";
       
       return {
         id: log.slug,
-        statement: log.principle.statement.replace(/\n/g, " "),
-        category: log.principle.category.toUpperCase(),
-        sourceTitle: log.title.replace(/\n/g, " "),
+        statement: log.principle?.statement?.replace(/\n/g, " ") || "",
+        category: log.principle?.category?.toUpperCase() || "UNKNOWN",
+        sourceTitle: log.title?.replace(/\n/g, " ") || "",
         sourceSlug: log.slug,
         year: year,
-        outcome: log.outcome.metrics.map(m => `${m.value} ${m.label}`).join(" \u00B7 ") || log.outcome.timeframe
+        outcome: log.outcome?.metrics?.map((m: any) => `${m.value} ${m.label}`).join(" \u00B7 ") || log.outcome?.timeframe || ""
       };
-    });
-  }, []);
+    }).filter(p => p.statement !== ""); // remove if no principle
+  }, [decisionLogs]);
 
   const totalCount = principles.length;
   
@@ -48,6 +82,10 @@ export default function PrinciplesPage() {
 
   const featuredPrinciple = principles[0]; // Just picking the first one as featured
 
+  if (loading || !pageData) {
+    return <div style={{ paddingTop: '120px', padding: '40px' }}>Loading...</div>;
+  }
+
   return (
     <>
       {/* Contextual Navigation */}
@@ -58,15 +96,9 @@ export default function PrinciplesPage() {
 
       {/* Hero */}
       <section className="section ev-hero" style={{ paddingTop: '64px', paddingBottom: '64px' }}>
-        <span className="eyebrow">PRINCIPLES</span>
-        <h1 className="section-heading ev-title" style={{ maxWidth: '900px', fontSize: '4rem', margin: '16px 0 32px 0' }}>
-          WHAT WE BELIEVE<br />
-          AFTER MAKING THE<br />
-          DECISION.
-        </h1>
-        <p className="card-description ev-subtitle" style={{ maxWidth: '600px', marginBottom: '48px' }}>
-          Principles extracted from the decisions we&apos;ve actually made.
-        </p>
+        <span className="eyebrow">{pageData.hero.eyebrow}</span>
+        <h1 className="section-heading ev-title" style={{ maxWidth: '900px', fontSize: '4rem', margin: '16px 0 32px 0' }} dangerouslySetInnerHTML={{ __html: (pageData.hero.title || "").replace(/\n/g, '<br />') }}></h1>
+        <p className="card-description ev-subtitle" style={{ maxWidth: '600px', marginBottom: '48px' }} dangerouslySetInnerHTML={{ __html: (pageData.hero.subtitle || "").replace(/\n/g, '<br />') }}></p>
 
         <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap', borderTop: '1px solid var(--color-structural)', paddingTop: '32px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -91,15 +123,10 @@ export default function PrinciplesPage() {
 
       {/* Introduction */}
       <section className="section" style={{ paddingTop: '64px', paddingBottom: '64px', borderTop: '1px solid var(--color-structural)', borderBottom: '1px solid var(--color-structural)' }}>
-        <h2 className="section-heading" style={{ fontSize: '2.5rem', marginBottom: '32px' }}>THESE AREN&apos;T BRAND VALUES.</h2>
+        <h2 className="section-heading" style={{ fontSize: '2.5rem', marginBottom: '32px' }}>{pageData.intro.title}</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <p className="trust-body" style={{ fontSize: '1.5rem', margin: 0 }}>They&apos;re conclusions.</p>
-          <p className="trust-body" style={{ fontSize: '1.25rem', color: 'var(--color-text-secondary)', maxWidth: '600px', margin: 0 }}>
-            Each principle came from a decision:<br />
-            something we chose,<br />
-            something we rejected,<br />
-            and something we learned.
-          </p>
+          <p className="trust-body" style={{ fontSize: '1.5rem', margin: 0 }}>{pageData.intro.subtitle}</p>
+          <p className="trust-body" style={{ fontSize: '1.25rem', color: 'var(--color-text-secondary)', maxWidth: '600px', margin: 0 }} dangerouslySetInnerHTML={{ __html: (pageData.intro.body || "").replace(/\n/g, '<br />') }}></p>
         </div>
       </section>
 
@@ -107,17 +134,16 @@ export default function PrinciplesPage() {
       <section className="section" style={{ paddingBottom: '64px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px', padding: '64px', backgroundColor: 'var(--color-surface)', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
           
-          <span className="card-heading" style={{ letterSpacing: '0.1em' }}>DECISION</span>
-          <span style={{ color: 'var(--color-text-secondary)' }}>&darr;</span>
-          <span className="card-heading" style={{ letterSpacing: '0.1em' }}>OUTCOME</span>
-          <span style={{ color: 'var(--color-text-secondary)' }}>&darr;</span>
-          <span className="card-heading" style={{ letterSpacing: '0.1em', color: 'var(--color-accent)' }}>PRINCIPLE</span>
-          <span style={{ color: 'var(--color-text-secondary)' }}>&darr;</span>
-          <span className="card-heading" style={{ letterSpacing: '0.1em' }}>FUTURE DECISIONS</span>
+          {(pageData.relationship.steps || []).map((step: any, idx: number, arr: any[]) => (
+            <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+              <span className="card-heading" style={{ letterSpacing: '0.1em', color: step.color === 'accent' ? 'var(--color-accent)' : 'inherit' }}>{step.label}</span>
+              {idx < arr.length - 1 && <span style={{ color: 'var(--color-text-secondary)' }}>&darr;</span>}
+            </div>
+          ))}
 
           <div style={{ borderTop: '1px solid var(--color-structural)', width: '100%', marginTop: '32px', paddingTop: '32px' }}>
-            <p className="trust-body" style={{ fontSize: '1.25rem', margin: 0 }}>A principle isn&apos;t written first.</p>
-            <p className="trust-body" style={{ fontSize: '1.25rem', margin: '8px 0 0 0', color: 'var(--color-text-secondary)' }}>It is earned through a decision.</p>
+            <p className="trust-body" style={{ fontSize: '1.25rem', margin: 0 }}>{pageData.relationship.footer1}</p>
+            <p className="trust-body" style={{ fontSize: '1.25rem', margin: '8px 0 0 0', color: 'var(--color-text-secondary)' }}>{pageData.relationship.footer2}</p>
           </div>
         </div>
       </section>
@@ -125,7 +151,7 @@ export default function PrinciplesPage() {
       {/* How the Principles Evolved (Timeline) */}
       {years.length > 0 && (
         <section className="section" style={{ borderTop: '1px solid var(--color-structural)', paddingBottom: '64px' }}>
-          <h2 className="section-label" style={{ marginBottom: '48px' }}>HOW THE PRINCIPLES EVOLVED</h2>
+          <h2 className="section-label" style={{ marginBottom: '48px' }}>{pageData.evolved.title}</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '32px', overflowX: 'auto', paddingBottom: '16px' }}>
             <button 
               onClick={() => setSelectedYear("ALL")}
@@ -153,7 +179,7 @@ export default function PrinciplesPage() {
 
       {/* Explore Principles Filter */}
       <section className="section" style={{ borderTop: '1px solid var(--color-structural)', paddingBottom: '32px' }}>
-        <h2 className="section-label" style={{ marginBottom: '32px' }}>EXPLORE PRINCIPLES</h2>
+        <h2 className="section-label" style={{ marginBottom: '32px' }}>{pageData.explore.title}</h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '32px' }}>
           {categories.map(cat => (
             <button 
@@ -179,7 +205,7 @@ export default function PrinciplesPage() {
       {featuredPrinciple && selectedCategory === "ALL" && selectedYear === "ALL" && (
         <section className="section" style={{ paddingBottom: '64px' }}>
           <div className="ev-panel" style={{ padding: '64px', backgroundColor: 'var(--color-surface)' }}>
-            <span className="section-label" style={{ marginBottom: '24px', display: 'block' }}>FEATURED PRINCIPLE</span>
+            <span className="section-label" style={{ marginBottom: '24px', display: 'block' }}>{pageData.featured.label}</span>
             <h3 className="section-heading" style={{ fontSize: '2.5rem', marginBottom: '24px', maxWidth: '800px' }}>
               {featuredPrinciple.statement}
             </h3>
@@ -202,7 +228,7 @@ export default function PrinciplesPage() {
 
       {/* Principle Index */}
       <section className="section" style={{ borderTop: '1px solid var(--color-structural)' }}>
-        <h2 className="section-label" style={{ marginBottom: '64px' }}>PRINCIPLES</h2>
+        <h2 className="section-label" style={{ marginBottom: '64px' }}>{pageData.indexSection.title}</h2>
         
         {filteredPrinciples.length === 0 ? (
           <p className="trust-body" style={{ color: 'var(--color-text-secondary)' }}>No principles match this filter.</p>
@@ -255,39 +281,34 @@ export default function PrinciplesPage() {
 
       {/* Decision Log Connection */}
       <section className="section" style={{ borderTop: '1px solid var(--color-structural)' }}>
-        <h2 className="section-heading" style={{ fontSize: '2.5rem', marginBottom: '16px' }}>EVERY PRINCIPLE HAS A HISTORY.</h2>
-        <p className="card-description" style={{ maxWidth: '600px', marginBottom: '48px', color: 'var(--color-text-secondary)' }}>
-          READ THE DECISIONS<br />
-          THAT CREATED THEM.
-        </p>
-        <Link href="/judgment" className="judgment-cta">EXPLORE JUDGMENT &rarr;</Link>
+        <h2 className="section-heading" style={{ fontSize: '2.5rem', marginBottom: '16px' }}>{pageData.judgmentConnection.title}</h2>
+        <p className="card-description" style={{ maxWidth: '600px', marginBottom: '48px', color: 'var(--color-text-secondary)' }} dangerouslySetInnerHTML={{ __html: (pageData.judgmentConnection.desc || "").replace(/\n/g, '<br />') }}></p>
+        <Link href="/judgment" className="judgment-cta">{pageData.judgmentConnection.cta}</Link>
       </section>
 
       {/* Evidence Connection */}
       <section className="section" style={{ borderTop: '1px solid var(--color-structural)' }}>
-        <h2 className="section-label" style={{ marginBottom: '48px' }}>PRINCIPLES &rarr; DECISIONS &rarr; EVIDENCE</h2>
+        <h2 className="section-label" style={{ marginBottom: '48px' }}>{pageData.evidenceConnection.title}</h2>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', marginBottom: '64px' }}>
-          <span className="card-heading" style={{ fontSize: '1.25rem' }}>What we believe</span>
-          <span style={{ color: 'var(--color-text-secondary)', fontSize: '1.5rem' }}>&darr;</span>
-          <span className="card-heading" style={{ fontSize: '1.25rem' }}>What we decided</span>
-          <span style={{ color: 'var(--color-text-secondary)', fontSize: '1.5rem' }}>&darr;</span>
-          <span className="card-heading" style={{ fontSize: '1.25rem', color: 'var(--color-accent)' }}>How we operate</span>
+          {(pageData.evidenceConnection.steps || []).map((step: any, idx: number, arr: any[]) => (
+            <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              <span className="card-heading" style={{ fontSize: '1.25rem', color: step.color === 'accent' ? 'var(--color-accent)' : 'inherit' }}>{step.label}</span>
+              {idx < arr.length - 1 && <span style={{ color: 'var(--color-text-secondary)', fontSize: '1.5rem' }}>&darr;</span>}
+            </div>
+          ))}
         </div>
         
-        <Link href="/evidence" className="judgment-cta">EXPLORE EVIDENCE &rarr;</Link>
+        <Link href="/evidence" className="judgment-cta">{pageData.evidenceConnection.cta}</Link>
       </section>
 
       {/* Closing Statement */}
       <section className="section" style={{ borderTop: '1px solid var(--color-structural)' }}>
         <div className="ev-panel" style={{ padding: '64px' }}>
           <h2 className="section-heading" style={{ fontSize: '2rem', marginBottom: '32px' }}>
-            PRINCIPLES AREN&apos;T PROMISES.
+            {pageData.closing.title}
           </h2>
-          <p className="trust-body" style={{ fontSize: '1.25rem', color: 'var(--color-text-secondary)', margin: 0 }}>
-            THEY&apos;RE THE PATTERNS WE KEEP<br />
-            AFTER THE DECISION IS MADE.
-          </p>
+          <p className="trust-body" style={{ fontSize: '1.25rem', color: 'var(--color-text-secondary)', margin: 0 }} dangerouslySetInnerHTML={{ __html: (pageData.closing.desc || "").replace(/\n/g, '<br />') }}></p>
         </div>
       </section>
     </>
