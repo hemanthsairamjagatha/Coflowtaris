@@ -35,6 +35,12 @@ export function Header() {
             LEVERAGE
           </Link>
           <Link 
+            href="/principles" 
+            className={isActive("/principles") ? "active-nav" : ""}
+          >
+            PRINCIPLES
+          </Link>
+          <Link 
             href="/contact" 
             className={`contact-link ${isActive("/contact") ? "active-nav" : ""}`.trim()}
           >
